@@ -1,0 +1,61 @@
+# Play1: configure apache on amazon linux 2 hosts
+- name: setting up apache webserver on amazon linux nodes
+  hosts: linux-nodes
+  tasks:
+    - name: Upgrade all packages on the server # yum update -y
+      ansible.builtin.yum:
+        name: '*'
+        state: latest
+    - name: Install the latest version of Apache # yum install httpd -y
+      ansible.builtin.yum:
+        name: httpd
+        state: latest
+    - name: Start service httpd, if not started # systemctl start httpd
+      ansible.builtin.service:
+        name: httpd
+        state: started
+    - name: Enable service httpd, and not touch the state # systemctl enable httpd
+      ansible.builtin.service:
+        name: httpd
+        enabled: yes
+    - name: Copy index.html file from the controller to the nodes at /var/www/html/ # echo "hello" > /var/www/html/index.html
+      ansible.builtin.copy:
+        src: /root/web/index.html
+        dest: /var/www/html/
+
+# Play2: configure apache on ubuntu hosts
+- name: setting up apache webserver on ubuntu nodes
+  hosts: ubuntu-nodes
+  tasks:
+    - name: Update all packages to their latest version
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+    - name: Install apache httpd  (state=present is optional)
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+    - name: Copy index.html file from the controller to the nodes at /var/www/html/ # echo "hello" > /var/www/html/index.html
+      ansible.builtin.copy:
+        src: /root/web/index.html
+        dest: /var/www/html/
+
+# Play3: install GIT on ubuntu hosts
+- name: install GIT on ubuntu hosts
+  hosts: ubuntu-nodes
+  tasks:
+    - name: Install git
+      apt:
+        name: git
+        state: present
+        update_cache: yes
+
+# Play4: install GIT on linux hosts
+- name: install GIT on ubuntu hosts
+  hosts: linux-nodes
+  tasks:
+    - name: Install git
+      yum:
+        name: git
+        state: present
+        update_cache: yes
